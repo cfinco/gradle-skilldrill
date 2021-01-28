@@ -4,17 +4,96 @@
 package edu.isu.cs.cs2263;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class App extends Application {
 
+    private LinkedList<Student> students;
+
     @Override
     public void start(Stage stage) throws Exception {
-        stage.setTitle("First JavaFX Application");
+        stage.setTitle("Course View");
+        IOManager ioManager = new IOManager();
+
+        ListView<Student> studentList = new ListView<>();
+        Label label = new Label("Students");
+        ListView<Course> courseList = new ListView<>();
+        Label label2 = new Label("Course");
+        Button loadDataBtn = new Button("Load Data");
+        Label label3 = new Label("Is Taking");
+
+        loadDataBtn.setOnAction(value -> {;
+            LinkedList<Student> data = ioManager.readData(System.getProperty("user.dir") + "/Data.json");
+            studentList.getItems().clear();
+            for (Student student :data) {
+                studentList.getItems().add(student);
+            }
+
+        });
+
+        studentList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Student>() {
+            @Override
+            public void changed(ObservableValue<? extends Student> observable, Student oldValue, Student newValue) {
+                courseList.getItems().clear();
+                for (Course c:newValue.courses) {
+                    courseList.getItems().add(c);
+                }
+            }
+        });
+
+        //VBox leftBox = new VBox(label);
+        //VBox rightBox = new VBox(label2);
+        //leftBox.setAlignment(Pos.CENTER_LEFT);
+        //rightBox.setAlignment(Pos.CENTER_RIGHT);
+
+        //HBox labelBox = new HBox(leftBox, rightBox);
+        //labelBox.setAlignment(Pos.CENTER);
+        //labelBox.setMargin(leftBox, new Insets(10, 10, 10, 10));
+        //labelBox.setMargin(rightBox, new Insets(10, 10, 10, 10));
+
+        VBox studentBox = new VBox(label, studentList);
+        studentBox.setAlignment(Pos.CENTER_LEFT);
+        VBox centerBox = new VBox(label3);
+        centerBox.setAlignment(Pos.CENTER);
+        VBox courseBox = new VBox(label2, courseList);
+        courseBox.setAlignment(Pos.CENTER_LEFT);
+
+        HBox listsBox = new HBox(studentBox, centerBox, courseBox);
+        listsBox.setAlignment(Pos.CENTER);
+        listsBox.setMargin(studentBox, new Insets(10, 20, 10, 20));
+        listsBox.setMargin(courseBox, new Insets(10, 20, 10, 20));
+
+        VBox buttonBox = new VBox(loadDataBtn);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+        HBox bottomBox = new HBox(buttonBox);
+        bottomBox.setAlignment(Pos.CENTER);
+        bottomBox.setMargin(buttonBox, new Insets(10, 10, 20, 10));
+
+        VBox layout = new VBox(listsBox, bottomBox);
+        layout.setAlignment(Pos.CENTER);
+
+        Scene scene2 = new Scene(layout, 700, 300);
+        stage.setScene(scene2);
         stage.show();
     }
 
     public static void main(String[] args) {
         Application.launch(args);
+
     }
 }
